@@ -1,0 +1,36 @@
+name: My Circular GitHub Poster
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/design-capabilities-d78dle
+    paths:
+      - .github/workflows/my_circular_poster.yml
+
+permissions:
+  contents: write
+
+jobs:
+  poster:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install svgwrite pendulum==3.0.0 colour requests
+      - name: Generate circular poster
+        run: python -m github_poster github --github_user_name gmsw76-png --me gmsw76-png --year 2026 --is-circular
+      - uses: actions/upload-artifact@v4
+        with:
+          name: github-circular-poster
+          path: OUT_FOLDER/*.svg
+      - name: Commit poster
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f OUT_FOLDER/*.svg
+          git commit -m "Generate circular GitHub poster for gmsw76-png" || exit 0
+          git push
